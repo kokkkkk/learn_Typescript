@@ -18,3 +18,9 @@ const recentViewer: Viewer = {
 export interface Viewer{
     isSuperFan: boolean;
 }
+
+//Extend an interface
+
+export interface Botviewer extends Viewer{
+    isBot: Boolean;
+}
