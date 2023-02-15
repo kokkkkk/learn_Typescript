@@ -93,7 +93,6 @@ export interface Deviation2 {
 }
 
 export interface stationID {
-  //   stationID: number | undefined;
   stationID: string;
 }
 

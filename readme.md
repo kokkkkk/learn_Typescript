@@ -9,5 +9,9 @@ Working with traffic data in TypeScript, retrive traffic data using API
 Result image from Postman
 ![Result image](ts-api-reactor/screenshot/result_in_postman.png)
 
-## Useful link
+## Useful links
 [Transform Json to Typescript](https://transform.tools/json-to-typescript)
+
+[Json Path Finder](https://jsonpathfinder.com/)
+
+[React Typescript Cheatsheets](https://react-typescript-cheatsheet.netlify.app/)
