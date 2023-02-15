@@ -5,7 +5,8 @@ const zod_1 = require("zod");
 const configSchema = zod_1.z.object({
     PORT: zod_1.z.string().default("3000"),
     API_URL: zod_1.z.string().url(),
-    API_KEY: zod_1.z.string()
+    API_KEY: zod_1.z.string(),
+    STOP_LOOKUP_API_KEY: zod_1.z.string(),
 });
 const loadConfig = () => {
     try {
@@ -14,6 +15,7 @@ const loadConfig = () => {
             port: Number(config.PORT),
             apiUrl: config.API_URL,
             apiKey: config.API_KEY,
+            stopLookupApiKey: config.STOP_LOOKUP_API_KEY,
         };
     }
     catch (error) {

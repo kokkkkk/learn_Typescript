@@ -12,39 +12,65 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_config_1 = require("./app-config");
+exports.Type = void 0;
 const express_1 = __importDefault(require("express"));
 const zod_1 = require("zod");
-const config = (0, app_config_1.loadConfig)();
+const app_config_1 = require("./app-config");
 const app = (0, express_1.default)();
-app.get('/times/:stationId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const config = (0, app_config_1.loadConfig)();
+const stationCache = new Map();
+var Type;
+(function (Type) {
+    Type["Station"] = "Station";
+})(Type = exports.Type || (exports.Type = {}));
+app.get('/times/:stationId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("geeettttt");
         const schema = zod_1.z.object({
             stationId: zod_1.z.string().transform((val) => Number(val)),
         });
         const { stationId } = schema.parse(req.params);
-        console.log(stationId);
-        const apiString = `${config === null || config === void 0 ? void 0 : config.apiUrl}?key=${config === null || config === void 0 ? void 0 : config.apiKey}&siteid=${stationId}&timewindow=5`;
-        console.log(apiString);
-        const apiCall = yield fetch(apiString);
+        const apiCall = yield fetch(`${config.apiUrl}/realtimedeparturesV4.json?key=${config.apiKey}&siteid=${stationId}&timewindow=60`);
         const data = yield apiCall.json();
         res.json({
             stationId,
-            results: data.ResponseData,
+            results: data.ResponseData
         });
     }
     catch (err) {
-        console.log(err);
-        if (err instanceof zod_1.ZodError) {
-            res.status(422).json({
-                message: err.message,
-                errors: err.errors,
-                cause: err.issues,
-            });
-        }
+        next(err);
     }
 }));
+app.get('/stations', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const schema = zod_1.z.object({ q: zod_1.z.string() });
+        const { q } = schema.parse(req.query);
+        if (stationCache.has(q)) {
+            return res.json({
+                query: q,
+                results: stationCache.get(q)
+            });
+        }
+        const apiCall = yield fetch(`${config.apiUrl}/typeahead.json?key=${config.stopLookupApiKey}&searchstring=${q}&stationsonly=true&maxresults=10`);
+        const stations = yield apiCall.json();
+        stationCache.set(q, stations.ResponseData);
+        res.json({
+            query: q,
+            results: stations.ResponseData,
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+app.use((err, _req, res, _next) => {
+    if (err instanceof zod_1.ZodError) {
+        res.status(422).json({
+            message: err.message,
+            errors: err.errors,
+            cause: err.issues,
+        });
+    }
+});
 app.listen(config === null || config === void 0 ? void 0 : config.port, () => {
-    console.log(`Listening on port ${config.port}`);
+    console.log(`Server started on port ${config.port}`);
 });
